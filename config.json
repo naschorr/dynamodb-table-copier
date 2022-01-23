@@ -1,0 +1,14 @@
+{
+    "aws_credentials_file_path"     : "",
+
+    "start_time_iso8601"            : "",
+    "end_time_iso8601"              : "",
+
+    "source_region_name"            : "",
+    "source_table_name"             : "",
+    "source_primary_key"            : "",
+
+    "destination_endpoint_url"      : "",
+    "destination_table_name"        : "",
+    "destination_primary_key"       : ""
+}

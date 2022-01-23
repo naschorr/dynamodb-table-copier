@@ -1,1 +1,1 @@
-# dynamodb-index-copier
+# dynamodb-table-copier
