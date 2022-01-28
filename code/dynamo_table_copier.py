@@ -1,10 +1,10 @@
 import os
 import dateutil
 import datetime
-from tqdm import tqdm
 import boto3
 from boto3.dynamodb.conditions import Attr
 from typing import List, Dict, Any
+from tqdm import tqdm
 
 import utilities
 
@@ -14,6 +14,7 @@ CONFIG_OPTIONS = utilities.load_config()
 
 class DynamoTableCopier:
     def __init__(self):
+        ## Load the configuration
         self.credentials_path: str = CONFIG_OPTIONS.get("aws_credentials_file_path")
         self.source_table_name: str = CONFIG_OPTIONS.get("source_table_name")
         self.destination_table_name: str = CONFIG_OPTIONS.get("destination_table_name")
@@ -75,7 +76,7 @@ class DynamoTableCopier:
         """Generically batch write the given list of dictionaries to the given table."""
 
         with table.batch_writer() as batch:
-            for item in items:
+            for item in tqdm(items, desc="Batch copying items "):
                 batch.put_item(
                     Item = item
                 )
@@ -99,21 +100,11 @@ class DynamoTableCopier:
 
             items = response.get("Items", [])
 
-            with tqdm(desc="Batch copying items", total=len(items)) as progress_bar:
-                ## Steps of 25, which is the maximum number of items that can be written in a single batch
-                for index in range(0, len(items), 25):
-                    batch_items = items[index:index + 25]
-                    self._batch_write_items(self.destination_table, batch_items)
-                    progress_bar.update(len(batch_items))
+            if (items):
+                self._batch_write_items(self.destination_table, items)
 
-                ## Make sure the last bit of response items are batched too
-                if (index < len(items)):
-                    batch_items = items[index:len(items)]
-                    self._batch_write_items(self.destination_table, batch_items)
-                    progress_bar.update(len(batch_items))
-            
-            counter += len(items)
-            print(f" Batch completed. Copied {counter} ({len(items)} new) items from {self.source_table_name} to {self.destination_table_name}.")
+                counter += len(items)
+                print(f" Batch completed. Copied {counter} ({len(items)} new) items from {self.source_table_name} to {self.destination_table_name}.")
 
             do_while = False
 
